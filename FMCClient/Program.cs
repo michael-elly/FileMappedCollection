@@ -15,19 +15,28 @@ class Program {
 		mHelp.Append("Select the command line option or enter you own:");
 		mHelp.AppendLine("Produce '<FMCPath>' <Count> <msg|min> <msgsizeMin>-<msgsizeMax> KB <waitMs>");
 		mHelp.AppendLine("Consume '<FMCPath>' <Count> <msg|min> <waitMs> <selectRandom>\r\n");
-		mHelp.AppendLine(@"1 = Produce 'c:\temp\a.amc' 1 msg 2-2 KB 0");
-		mHelp.AppendLine(@"2 = Produce 'c:\temp\a.amc' 2 min 2-500 KB 300");
-		mHelp.AppendLine(@"3 = Produce 'c:\temp\a.amc' 2 min 1-50 KB 50");
-		mHelp.AppendLine(@"4 = Consume 'c:\temp\a.amc' 1 msg 0 0");
-		mHelp.AppendLine(@"5 = Consume 'c:\temp\a.amc' 2 min 300 1");
-		mHelp.AppendLine(@"6 = Consume 'c:\temp\a.amc' 2 min 50 1");
-		mHelp.AppendLine(@"7 = Consume 'c:\temp\a.amc' 2 min 50 0");
+		mHelp.AppendLine(@"1  = Produce 'c:\temp\a.amc' 1 msg 2-2 KB 0");
+		mHelp.AppendLine(@"2  = Produce 'c:\temp\a.amc' 2 min 2-500 KB 300");
+		mHelp.AppendLine(@"3  = Produce 'c:\temp\a.amc' 2 min 1-50 KB 50");
+		mHelp.AppendLine(@"4  = Produce 'c:\temp\a.amc' 2 min 1-10 KB 10");
+		mHelp.AppendLine(@"5  = Consume 'c:\temp\a.amc' 1 msg 0 0");
+		mHelp.AppendLine(@"6  = Consume 'c:\temp\a.amc' 2 min 300 1");
+		mHelp.AppendLine(@"7  = Consume 'c:\temp\a.amc' 2 min 50 1");
+		mHelp.AppendLine(@"8  = Consume 'c:\temp\a.amc' 2 min 50 0");
+		mHelp.AppendLine(@"9  = Consume 'c:\temp\a.amc' 2 min 10 1");
+		mHelp.AppendLine(@"10 = Consume 'c:\temp\a.amc' 2 min 10 0");
 		mHelp.AppendLine("Enter q to quit");
 		mHelp.AppendLine("Enter h to help");
 
 		Console.WriteLine(mHelp.ToString());
 		string input = "";
 		int selected_option;
+
+		// Start the output writer thread		
+		Thread writer = new Thread(delegate () { OutputWriterThread(); });
+		writer.IsBackground = true;
+		writer.Name = "Output Writer";
+		writer.Start();
 
 		while (true) {
 			Console.Write("> ");
@@ -37,7 +46,7 @@ class Program {
 			} else if (input.Trim().ToLower() == "h") {
 				Console.WriteLine(mHelp.ToString());
 			} else if (int.TryParse(input, out selected_option)) {
-				if (selected_option >= 1 && selected_option <= 7) {
+				if (selected_option >= 1 && selected_option <= 10) {
 					if (selected_option == 1) {
 						Produce("c:\\temp\\a.amc", 1, true, 2, 2, 0);
 					} else if (selected_option == 2) {
@@ -45,13 +54,19 @@ class Program {
 					} else if (selected_option == 3) {
 						Produce("c:\\temp\\a.amc", 2, false, 1, 50, 50);
 					} else if (selected_option == 4) {
-						Consume("c:\\temp\\a.amc", 1, true, 0, false);
+						Produce("c:\\temp\\a.amc", 2, false, 1, 10, 10);
 					} else if (selected_option == 5) {
-						Consume("c:\\temp\\a.amc", 2, false, 300, true);
+						Consume("c:\\temp\\a.amc", 1, true, 0, false);
 					} else if (selected_option == 6) {
-						Consume("c:\\temp\\a.amc", 2, false, 50, true);
+						Consume("c:\\temp\\a.amc", 2, false, 300, true);
 					} else if (selected_option == 7) {
+						Consume("c:\\temp\\a.amc", 2, false, 50, true);
+					} else if (selected_option == 8) {
 						Consume("c:\\temp\\a.amc", 2, false, 50, false);
+					} else if (selected_option == 9) {
+						Consume("c:\\temp\\a.amc", 2, false, 10, true);
+					} else if (selected_option == 10) {
+						Consume("c:\\temp\\a.amc", 2, false, 10, false);
 					}
 				} else {
 					Console.WriteLine("Error: Invalid option selected.");
@@ -66,6 +81,7 @@ class Program {
 		//new Thread(delegate () { }).Start();
 
 		if (File.Exists(filePath)) {
+			int num_produced = 0;
 			FileInfo fi = new FileInfo(filePath);
 			FileMappedCollection f = new FileMappedCollection(filePath, (int)fi.Length, (int)fi.Length * 4, (int)fi.Length / 10, false, false);
 			// create a set of 10 random messages	
@@ -80,48 +96,73 @@ class Program {
 			}
 
 			// do it
+			Stopwatch sw = new Stopwatch();
+			sw.Restart();
 			if (isNumMsg) {
 				int rand_msg_idx;
 				for (int i = 0; i < count; i++) {
 					rand_msg_idx = (minSizeKB == maxSizeKB ? 0 : GetRandomNumber(sample_random_messages_count));
-					if (f.TryPut(msgs_byte_arr[rand_msg_idx])) Console.Write("."); else Console.Write("X");
+					if (f.TryPut(msgs_byte_arr[rand_msg_idx])) {
+						mOutputMessages.Enqueue(".");
+						num_produced++;
+					} else {
+						mOutputMessages.Enqueue("X");
+					}
 					if (waitMs > 0) Thread.Sleep(waitMs);
 				}
 			} else {
 				int rand_msg_idx;
-				Stopwatch sw = new Stopwatch();
-				sw.Restart();
 				while (sw.Elapsed.TotalMinutes < count) {
 					rand_msg_idx = (minSizeKB == maxSizeKB ? 0 : GetRandomNumber(sample_random_messages_count));
-					if (f.TryPut(msgs_byte_arr[rand_msg_idx])) Console.Write("."); else Console.Write("X");
+					if (f.TryPut(msgs_byte_arr[rand_msg_idx])) {
+						mOutputMessages.Enqueue(".");
+						num_produced++;
+					} else {
+						mOutputMessages.Enqueue("X");
+					}
 					if (waitMs > 0) Thread.Sleep(waitMs);
 				}
 			}
-			Console.WriteLine("\r\nDone.");
+			sw.Stop();
+			Console.WriteLine($"\r\nDone. Produced {num_produced:N0} messages. Rate = {num_produced / sw.Elapsed.TotalSeconds:N1} msg/sec");
 		} else {
 			Console.WriteLine($"Error: File '{filePath}' does not exist.");
 		}
 	}
 
-	static void Consume(string filePath, int count, bool isNumMsg, int waitMs, bool getRandom) {
+	static ConcurrentQueue<string> mOutputMessages = new ConcurrentQueue<string>();
+
+	static void Consume(string filePath, int count, bool isNumMsg, int waitMs, bool getRandom) {		
 		if (File.Exists(filePath)) {
+			int num_consumed = 0;
 			FileInfo fi = new FileInfo(filePath);
 			FileMappedCollection f = new FileMappedCollection(filePath, (int)fi.Length, (int)fi.Length * 4, (int)fi.Length / 10, false, false);
 			List<FileMappedCollection.RecordAddress> rec_addresses;
 			if (f.TryPeekAddresses(out rec_addresses, isNumMsg ? count : int.MaxValue)) {
 				if (getRandom) Shuffle<FileMappedCollection.RecordAddress>(rec_addresses);
+				// lets do it...
+				Stopwatch sw = new Stopwatch();
+				sw.Restart();
 				if (isNumMsg) {
 					for (int i = 0; i < count; i++) {
-						if (f.TryRemoveAt(rec_addresses[i].StartAddress) == FileMappedCollection.RecordRetreivalStatus.Success) Console.Write("."); else Console.Write("X");
+						if (f.TryRemoveAt(rec_addresses[i].StartAddress) == FileMappedCollection.RecordRetreivalStatus.Success) {
+							mOutputMessages.Enqueue(".");
+							num_consumed++;
+						} else {
+							mOutputMessages.Enqueue("X");
+						}
 						if (waitMs > 0) Thread.Sleep(waitMs);
 					}
 				} else {
-					Stopwatch sw = new Stopwatch();
-					sw.Restart();
 					int i = 0;
 					while (sw.Elapsed.TotalMinutes < count) {
 						if (i < rec_addresses.Count) {
-							if (f.TryRemoveAt(rec_addresses[i++].StartAddress) == FileMappedCollection.RecordRetreivalStatus.Success) Console.Write("."); else Console.Write("X");
+							if (f.TryRemoveAt(rec_addresses[i++].StartAddress) == FileMappedCollection.RecordRetreivalStatus.Success) {
+								mOutputMessages.Enqueue(".");
+								num_consumed++;
+							} else {
+								mOutputMessages.Enqueue("X");
+							}
 							if (waitMs > 0) Thread.Sleep(waitMs);
 						} else {
 							if (f.TryPeekAddresses(out rec_addresses)) {
@@ -134,12 +175,23 @@ class Program {
 						}
 					}
 				}
-				Console.WriteLine("\r\nDone.");
+				sw.Stop();
+				Console.WriteLine($"\r\nDone. Consumed {num_consumed:N0} messages. Rate = {num_consumed/sw.Elapsed.TotalSeconds:N1} msg/sec");
 			} else {
 				Console.WriteLine($"Error: Was unable to peek addresses from file '{filePath}'");
 			}
 		} else {
 			Console.WriteLine($"Error: File '{filePath}' does not exist.");
+		}
+	}
+
+	private static void OutputWriterThread() {		
+		while (true) {
+			if (mOutputMessages.TryDequeue(out string? str)) {
+				if (!string.IsNullOrEmpty(str)) Console.Write(str);
+			} else {
+				Thread.Sleep(300);
+			}
 		}
 	}
 
