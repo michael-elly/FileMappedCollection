@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using System.Runtime.Versioning;
 
 // ========================================================================================================================================
 // This is a stand alone class which can be copied as is to other porojects because it does not have any other dependencies
@@ -145,6 +146,8 @@ public class FileMappedCollection { // records collection file
 	/// <param name="maxFileSizeBytes"></param>
 	/// <param name="incrementSizeBytes"></param>
 	/// <param name="regenerateFileIffoundCorrupt"></param>
+	[SupportedOSPlatform("linux")]
+	[SupportedOSPlatform("windows")]
 	public FileMappedCollection(string systemWideIdentifier, string filePath, int initialFileSizeBytes, int maxFileSizeBytes, int incrementSizeBytes, bool regenerateFileIffoundCorrupt, bool enableAutoShrink) {
 		FilePath = filePath;
 		FileSizeInitialBytes = (File.Exists(FilePath) ? ((int)(new FileInfo(FilePath)).Length) : initialFileSizeBytes);

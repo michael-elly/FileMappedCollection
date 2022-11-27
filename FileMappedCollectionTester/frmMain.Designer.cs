@@ -50,6 +50,7 @@
 			this.mnuShrink = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuExtend = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuDefrag = new System.Windows.Forms.ToolStripMenuItem();
+			this.mnuTruncate = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.mnuExpertMode = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuPeekSelectedRecord = new System.Windows.Forms.ToolStripMenuItem();
@@ -94,11 +95,11 @@
 			// 
 			// btnLoad
 			// 
-			this.btnLoad.Image = global::FileMappedCollectionViewer.Properties.Resources.Refresh;
+			this.btnLoad.Image = global::FileMappedCollectionViewer.Properties.Resources.open_blue;
 			this.btnLoad.Location = new System.Drawing.Point(536, 7);
 			this.btnLoad.Name = "btnLoad";
 			this.btnLoad.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
-			this.btnLoad.Size = new System.Drawing.Size(95, 64);
+			this.btnLoad.Size = new System.Drawing.Size(95, 75);
 			this.btnLoad.TabIndex = 5;
 			this.btnLoad.Text = "Reload";
 			this.btnLoad.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
@@ -267,6 +268,7 @@
             this.mnuShrink,
             this.mnuExtend,
             this.mnuDefrag,
+            this.mnuTruncate,
             this.toolStripMenuItem2,
             this.mnuExpertMode,
             this.toolStripMenuItem3,
@@ -282,47 +284,54 @@
 			this.mnuRefreshMap.Image = global::FileMappedCollectionViewer.Properties.Resources.Refresh;
 			this.mnuRefreshMap.Name = "mnuRefreshMap";
 			this.mnuRefreshMap.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.mnuRefreshMap.Size = new System.Drawing.Size(159, 22);
+			this.mnuRefreshMap.Size = new System.Drawing.Size(180, 22);
 			this.mnuRefreshMap.Text = "Refresh Map";
 			this.mnuRefreshMap.Click += new System.EventHandler(this.mnuRefreshMap_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(156, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
 			// 
 			// mnuVerify
 			// 
 			this.mnuVerify.Name = "mnuVerify";
-			this.mnuVerify.Size = new System.Drawing.Size(159, 22);
+			this.mnuVerify.Size = new System.Drawing.Size(180, 22);
 			this.mnuVerify.Text = "Verify";
 			this.mnuVerify.Click += new System.EventHandler(this.mnuVerify_Click);
 			// 
 			// mnuShrink
 			// 
 			this.mnuShrink.Name = "mnuShrink";
-			this.mnuShrink.Size = new System.Drawing.Size(159, 22);
+			this.mnuShrink.Size = new System.Drawing.Size(180, 22);
 			this.mnuShrink.Text = "Shrink";
 			this.mnuShrink.Click += new System.EventHandler(this.mnuShrink_Click);
 			// 
 			// mnuExtend
 			// 
 			this.mnuExtend.Name = "mnuExtend";
-			this.mnuExtend.Size = new System.Drawing.Size(159, 22);
+			this.mnuExtend.Size = new System.Drawing.Size(180, 22);
 			this.mnuExtend.Text = "Extend";
 			this.mnuExtend.Click += new System.EventHandler(this.mnuExtend_Click);
 			// 
 			// mnuDefrag
 			// 
 			this.mnuDefrag.Name = "mnuDefrag";
-			this.mnuDefrag.Size = new System.Drawing.Size(159, 22);
+			this.mnuDefrag.Size = new System.Drawing.Size(180, 22);
 			this.mnuDefrag.Text = "Defrag";
 			this.mnuDefrag.Click += new System.EventHandler(this.mnuDefrag_Click);
+			// 
+			// mnuTruncate
+			// 
+			this.mnuTruncate.Name = "mnuTruncate";
+			this.mnuTruncate.Size = new System.Drawing.Size(180, 22);
+			this.mnuTruncate.Text = "Truncate";
+			this.mnuTruncate.Click += new System.EventHandler(this.mnuTruncate_Click);
 			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(156, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(177, 6);
 			// 
 			// mnuExpertMode
 			// 
@@ -330,7 +339,7 @@
             this.mnuPeekSelectedRecord,
             this.mnuDequeueSelectedRecord});
 			this.mnuExpertMode.Name = "mnuExpertMode";
-			this.mnuExpertMode.Size = new System.Drawing.Size(159, 22);
+			this.mnuExpertMode.Size = new System.Drawing.Size(180, 22);
 			this.mnuExpertMode.Text = "Expert Mode";
 			this.mnuExpertMode.DropDownOpening += new System.EventHandler(this.mnuExpertMode_DropDownOpening);
 			// 
@@ -351,12 +360,12 @@
 			// toolStripMenuItem3
 			// 
 			this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-			this.toolStripMenuItem3.Size = new System.Drawing.Size(156, 6);
+			this.toolStripMenuItem3.Size = new System.Drawing.Size(177, 6);
 			// 
 			// mnuClose
 			// 
 			this.mnuClose.Name = "mnuClose";
-			this.mnuClose.Size = new System.Drawing.Size(159, 22);
+			this.mnuClose.Size = new System.Drawing.Size(180, 22);
 			this.mnuClose.Text = "Close";
 			this.mnuClose.Click += new System.EventHandler(this.mnuClose_Click);
 			// 
@@ -374,7 +383,7 @@
 			// mnuCopyCellText
 			// 
 			this.mnuCopyCellText.Name = "mnuCopyCellText";
-			this.mnuCopyCellText.Size = new System.Drawing.Size(149, 22);
+			this.mnuCopyCellText.Size = new System.Drawing.Size(180, 22);
 			this.mnuCopyCellText.Text = "Copy Cell Text";
 			this.mnuCopyCellText.Click += new System.EventHandler(this.mnuCopyCellText_Click);
 			// 
@@ -406,7 +415,6 @@
 			this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
 			this.toolStripDropDownButton2.Size = new System.Drawing.Size(81, 22);
 			this.toolStripDropDownButton2.Text = "Fill Table";
-			this.toolStripDropDownButton2.Click += new System.EventHandler(this.toolStripDropDownButton2_Click);
 			// 
 			// mnuFillTableWith10LastRecords
 			// 
@@ -526,5 +534,6 @@
 		private ToolStripStatusLabel lblNumRecordsStatusBar;
 		private ToolStripStatusLabel lblVerifyState;
 		private ToolStripStatusLabel lblLastUpdated;
+		private ToolStripMenuItem mnuTruncate;
 	}
 }

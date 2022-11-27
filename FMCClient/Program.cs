@@ -19,12 +19,16 @@ class Program {
 		mHelp.AppendLine(@"2  = Produce 'c:\temp\a.amc' 2 min 2-500 KB 300");
 		mHelp.AppendLine(@"3  = Produce 'c:\temp\a.amc' 2 min 1-50 KB 50");
 		mHelp.AppendLine(@"4  = Produce 'c:\temp\a.amc' 2 min 1-10 KB 10");
-		mHelp.AppendLine(@"5  = Consume 'c:\temp\a.amc' 1 msg 0 0");
-		mHelp.AppendLine(@"6  = Consume 'c:\temp\a.amc' 2 min 300 1");
-		mHelp.AppendLine(@"7  = Consume 'c:\temp\a.amc' 2 min 50 1");
-		mHelp.AppendLine(@"8  = Consume 'c:\temp\a.amc' 2 min 50 0");
-		mHelp.AppendLine(@"9  = Consume 'c:\temp\a.amc' 2 min 10 1");
-		mHelp.AppendLine(@"10 = Consume 'c:\temp\a.amc' 2 min 10 0");
+		mHelp.AppendLine(@"5  = Produce 'c:\temp\a.amc' 1 min 1-10 KB 0");
+		mHelp.AppendLine("");
+		mHelp.AppendLine(@"6  = Consume 'c:\temp\a.amc' 1 msg 0 0");
+		mHelp.AppendLine(@"7  = Consume 'c:\temp\a.amc' 2 min 300 1");
+		mHelp.AppendLine(@"8  = Consume 'c:\temp\a.amc' 2 min 50 1");
+		mHelp.AppendLine(@"9  = Consume 'c:\temp\a.amc' 2 min 50 0");
+		mHelp.AppendLine(@"10 = Consume 'c:\temp\a.amc' 2 min 10 1");
+		mHelp.AppendLine(@"11 = Consume 'c:\temp\a.amc' 2 min 10 0");
+		mHelp.AppendLine(@"12 = Consume 'c:\temp\a.amc' 1 min  0 1");
+		mHelp.AppendLine(@"13 = Consume 'c:\temp\a.amc' 1 min  0 0");
 		mHelp.AppendLine("Enter q to quit");
 		mHelp.AppendLine("Enter h to help");
 
@@ -46,7 +50,7 @@ class Program {
 			} else if (input.Trim().ToLower() == "h") {
 				Console.WriteLine(mHelp.ToString());
 			} else if (int.TryParse(input, out selected_option)) {
-				if (selected_option >= 1 && selected_option <= 10) {
+				if (selected_option >= 1 && selected_option <= 13) {
 					if (selected_option == 1) {
 						Produce("c:\\temp\\a.amc", 1, true, 2, 2, 0);
 					} else if (selected_option == 2) {
@@ -56,17 +60,23 @@ class Program {
 					} else if (selected_option == 4) {
 						Produce("c:\\temp\\a.amc", 2, false, 1, 10, 10);
 					} else if (selected_option == 5) {
-						Consume("c:\\temp\\a.amc", 1, true, 0, false);
+						Produce("c:\\temp\\a.amc", 1, false, 1, 10, 0);
 					} else if (selected_option == 6) {
-						Consume("c:\\temp\\a.amc", 2, false, 300, true);
+						Consume("c:\\temp\\a.amc", 1, true, 0, false);
 					} else if (selected_option == 7) {
-						Consume("c:\\temp\\a.amc", 2, false, 50, true);
+						Consume("c:\\temp\\a.amc", 2, false, 300, true);
 					} else if (selected_option == 8) {
-						Consume("c:\\temp\\a.amc", 2, false, 50, false);
+						Consume("c:\\temp\\a.amc", 2, false, 50, true);
 					} else if (selected_option == 9) {
-						Consume("c:\\temp\\a.amc", 2, false, 10, true);
+						Consume("c:\\temp\\a.amc", 2, false, 50, false);
 					} else if (selected_option == 10) {
+						Consume("c:\\temp\\a.amc", 2, false, 10, true);
+					} else if (selected_option == 11) {
 						Consume("c:\\temp\\a.amc", 2, false, 10, false);
+					} else if (selected_option == 12) {
+						Consume("c:\\temp\\a.amc", 1, false, 0, true);
+					} else if (selected_option == 13) {
+						Consume("c:\\temp\\a.amc", 1, false, 0, false);
 					}
 				} else {
 					Console.WriteLine("Error: Invalid option selected.");

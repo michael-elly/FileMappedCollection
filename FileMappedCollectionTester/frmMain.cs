@@ -69,7 +69,6 @@ public partial class frmMain : Form {
 		string err_msg;
 		bool is_ok = mRecords.VerifyConsistency(out err_msg);
 		List<FileMappedCollection.Record> l;
-		int i;
 		bool have_read_all_available_records_on_file;
 
 		size_bytes = mRecords.FileSizeBytes;
@@ -90,7 +89,6 @@ public partial class frmMain : Form {
 				int immidiate_unused_bytes;
 
 				if (records_count > 0) {
-					i = 0;
 					foreach (FileMappedCollection.Record r in l) {
 						total_used_bytes += r.RecordSize;
 					}
@@ -253,11 +251,6 @@ public partial class frmMain : Form {
 
 	}
 
-	private void toolStripDropDownButton2_Click(object sender, EventArgs e) {
-		PopulateRecords(10, false);
-
-	}
-
 	private void PopulateRecords(int count, bool reverse) {
 		int i;
 		List<FileMappedCollection.Record> l;
@@ -319,10 +312,16 @@ public partial class frmMain : Form {
 	}
 
 	private void grdRecords_CellDoubleClick(object sender, DataGridViewCellEventArgs e) {
-		if (e.RowIndex >= 0 && e.ColumnIndex == 4) {
+		if (e != null && e.RowIndex >= 0 && e.ColumnIndex == 4 && grdRecords.Rows[e.RowIndex].Cells[e.ColumnIndex].Value != null) {
 			frmXml f = new frmXml();
 			f.mXmlText = grdRecords.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
 			f.ShowDialog(this);
+		}
+	}
+
+	private void mnuTruncate_Click(object sender, EventArgs e) {		
+		if (mRecords.TryClear()) {
+			RefreshControlsNow();
 		}
 	}
 }
