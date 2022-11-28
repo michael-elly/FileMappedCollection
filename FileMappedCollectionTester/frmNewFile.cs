@@ -41,6 +41,8 @@ namespace FileMappedCollectionViewer {
 			max_extensions = (byte)nudMaxExtensions.Value;
 			regerenate_file_on_error = chkRegenerateFile.Checked;
 			enable_auto_shrink = chkAutoShrink.Checked;
+
+			SetFileBackground();
 		}
 
 		public void PopulateValuesFromFmcObjectToPublicFields(FileMappedCollection mRecords) {
@@ -58,6 +60,12 @@ namespace FileMappedCollectionViewer {
 			nudMaxExtensions.Value = max_extensions;
 			chkRegenerateFile.Checked = regerenate_file_on_error;
 			chkAutoShrink.Checked = enable_auto_shrink;
+
+			SetFileBackground();
+		}
+
+		private void SetFileBackground() {
+			txtPath.BackColor = File.Exists(path) ? Color.LightGreen : Color.LightCoral;
 		}
 
 		private void btnDelete_Click(object sender, EventArgs e) {
@@ -66,12 +74,13 @@ namespace FileMappedCollectionViewer {
 			} catch (Exception ex) {
 				MessageBox.Show("Error: " + ex.Message);
 			}
+
+			SetFileBackground();
 		}
 
 		private void btnStoreToFields_Click(object sender, EventArgs e) {
 			PopulateValuesFromControlsToPublicFields();
 			this.Close();
-
 		}
 	}
 }

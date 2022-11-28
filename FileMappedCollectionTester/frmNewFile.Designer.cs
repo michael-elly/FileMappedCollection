@@ -55,7 +55,7 @@
 			// chkRegenerateFile
 			// 
 			this.chkRegenerateFile.AutoSize = true;
-			this.chkRegenerateFile.Location = new System.Drawing.Point(370, 74);
+			this.chkRegenerateFile.Location = new System.Drawing.Point(13, 103);
 			this.chkRegenerateFile.Name = "chkRegenerateFile";
 			this.chkRegenerateFile.Size = new System.Drawing.Size(160, 19);
 			this.chkRegenerateFile.TabIndex = 21;
@@ -201,10 +201,10 @@
 			// 
 			// btnStoreToFields
 			// 
-			this.btnStoreToFields.Location = new System.Drawing.Point(13, 103);
+			this.btnStoreToFields.Location = new System.Drawing.Point(385, 80);
 			this.btnStoreToFields.Name = "btnStoreToFields";
-			this.btnStoreToFields.Size = new System.Drawing.Size(121, 42);
-			this.btnStoreToFields.TabIndex = 24;
+			this.btnStoreToFields.Size = new System.Drawing.Size(162, 42);
+			this.btnStoreToFields.TabIndex = 0;
 			this.btnStoreToFields.Text = "Update Fields";
 			this.btnStoreToFields.UseVisualStyleBackColor = true;
 			this.btnStoreToFields.Click += new System.EventHandler(this.btnStoreToFields_Click);
@@ -213,7 +213,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(559, 157);
+			this.ClientSize = new System.Drawing.Size(559, 132);
 			this.Controls.Add(this.btnStoreToFields);
 			this.Controls.Add(this.btnDelete);
 			this.Controls.Add(this.txtPath);
