@@ -52,9 +52,10 @@
 			this.toolStripDropDownButton5 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.mnuCopyCellText = new System.Windows.Forms.ToolStripMenuItem();
 			this.btnAutoRefresh = new System.Windows.Forms.ToolStripButton();
-			this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
-			this.mnuFillTableWith10LastRecords = new System.Windows.Forms.ToolStripMenuItem();
-			this.mnuFillTableWithAllRecords = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+			this.mnuShowLastRec = new System.Windows.Forms.ToolStripLabel();
+			this.txtShowNRecords = new System.Windows.Forms.ToolStripTextBox();
+			this.btnShowRecords = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.txtPath = new System.Windows.Forms.ToolStripLabel();
 			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -85,7 +86,7 @@
 			// picFile
 			// 
 			this.picFile.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.picFile.Location = new System.Drawing.Point(0, 70);
+			this.picFile.Location = new System.Drawing.Point(0, 62);
 			this.picFile.Name = "picFile";
 			this.picFile.Size = new System.Drawing.Size(617, 20);
 			this.picFile.TabIndex = 1;
@@ -95,6 +96,7 @@
 			// 
 			this.grdRecords.AllowUserToAddRows = false;
 			this.grdRecords.AllowUserToDeleteRows = false;
+			this.grdRecords.AllowUserToResizeRows = false;
 			this.grdRecords.BackgroundColor = System.Drawing.SystemColors.Control;
 			this.grdRecords.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.grdRecords.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -106,6 +108,7 @@
 			this.grdRecords.Location = new System.Drawing.Point(9, 49);
 			this.grdRecords.Name = "grdRecords";
 			this.grdRecords.ReadOnly = true;
+			this.grdRecords.RowHeadersVisible = false;
 			this.grdRecords.RowTemplate.Height = 25;
 			this.grdRecords.Size = new System.Drawing.Size(573, 66);
 			this.grdRecords.TabIndex = 2;
@@ -113,33 +116,43 @@
 			// 
 			// Column1
 			// 
+			this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+			this.Column1.Frozen = true;
 			this.Column1.HeaderText = "#";
 			this.Column1.Name = "Column1";
 			this.Column1.ReadOnly = true;
+			this.Column1.Width = 39;
 			// 
 			// Column2
 			// 
+			this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
 			this.Column2.HeaderText = "Start";
 			this.Column2.Name = "Column2";
 			this.Column2.ReadOnly = true;
+			this.Column2.Width = 56;
 			// 
 			// Column4
 			// 
+			this.Column4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
 			this.Column4.HeaderText = "Next";
 			this.Column4.Name = "Column4";
 			this.Column4.ReadOnly = true;
+			this.Column4.Width = 57;
 			// 
 			// Column3
 			// 
+			this.Column3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
 			this.Column3.HeaderText = "Length";
 			this.Column3.Name = "Column3";
 			this.Column3.ReadOnly = true;
+			this.Column3.Width = 69;
 			// 
 			// Column5
 			// 
 			this.Column5.HeaderText = "Message";
 			this.Column5.Name = "Column5";
 			this.Column5.ReadOnly = true;
+			this.Column5.Width = 349;
 			// 
 			// toolStrip1
 			// 
@@ -148,12 +161,15 @@
             this.toolStripDropDownButton6,
             this.toolStripDropDownButton5,
             this.btnAutoRefresh,
-            this.toolStripDropDownButton2,
+            this.toolStripSeparator3,
+            this.mnuShowLastRec,
+            this.txtShowNRecords,
+            this.btnShowRecords,
             this.toolStripSeparator1,
             this.txtPath});
 			this.toolStrip1.Location = new System.Drawing.Point(0, 0);
 			this.toolStrip1.Name = "toolStrip1";
-			this.toolStrip1.Size = new System.Drawing.Size(767, 25);
+			this.toolStrip1.Size = new System.Drawing.Size(675, 25);
 			this.toolStrip1.TabIndex = 3;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
@@ -182,70 +198,70 @@
 			// 
 			// mnuNewFMC
 			// 
-			this.mnuNewFMC.Image = global::FileMappedCollectionViewer.Properties.Resources.New_16x16;
+			this.mnuNewFMC.Image = global::FileMappedCollectionViewer.Properties.Resources.blue_document_binary;
 			this.mnuNewFMC.Name = "mnuNewFMC";
-			this.mnuNewFMC.Size = new System.Drawing.Size(159, 22);
-			this.mnuNewFMC.Text = "New FMC...";
+			this.mnuNewFMC.Size = new System.Drawing.Size(264, 22);
+			this.mnuNewFMC.Text = "File Mapped Collection Properties... ";
 			this.mnuNewFMC.Click += new System.EventHandler(this.mnuNewFMC_Click);
 			// 
 			// toolStripMenuItem4
 			// 
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-			this.toolStripMenuItem4.Size = new System.Drawing.Size(156, 6);
+			this.toolStripMenuItem4.Size = new System.Drawing.Size(261, 6);
 			// 
 			// mnuRefreshMap
 			// 
 			this.mnuRefreshMap.Image = global::FileMappedCollectionViewer.Properties.Resources.Refresh;
 			this.mnuRefreshMap.Name = "mnuRefreshMap";
 			this.mnuRefreshMap.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.mnuRefreshMap.Size = new System.Drawing.Size(159, 22);
+			this.mnuRefreshMap.Size = new System.Drawing.Size(264, 22);
 			this.mnuRefreshMap.Text = "Refresh Map";
 			this.mnuRefreshMap.Click += new System.EventHandler(this.mnuRefreshMap_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(156, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(261, 6);
 			// 
 			// mnuVerify
 			// 
 			this.mnuVerify.Name = "mnuVerify";
-			this.mnuVerify.Size = new System.Drawing.Size(159, 22);
+			this.mnuVerify.Size = new System.Drawing.Size(264, 22);
 			this.mnuVerify.Text = "Verify";
 			this.mnuVerify.Click += new System.EventHandler(this.mnuVerify_Click);
 			// 
 			// mnuShrink
 			// 
 			this.mnuShrink.Name = "mnuShrink";
-			this.mnuShrink.Size = new System.Drawing.Size(159, 22);
+			this.mnuShrink.Size = new System.Drawing.Size(264, 22);
 			this.mnuShrink.Text = "Shrink";
 			this.mnuShrink.Click += new System.EventHandler(this.mnuShrink_Click);
 			// 
 			// mnuExtend
 			// 
 			this.mnuExtend.Name = "mnuExtend";
-			this.mnuExtend.Size = new System.Drawing.Size(159, 22);
+			this.mnuExtend.Size = new System.Drawing.Size(264, 22);
 			this.mnuExtend.Text = "Extend";
 			this.mnuExtend.Click += new System.EventHandler(this.mnuExtend_Click);
 			// 
 			// mnuDefrag
 			// 
 			this.mnuDefrag.Name = "mnuDefrag";
-			this.mnuDefrag.Size = new System.Drawing.Size(159, 22);
+			this.mnuDefrag.Size = new System.Drawing.Size(264, 22);
 			this.mnuDefrag.Text = "Defrag";
 			this.mnuDefrag.Click += new System.EventHandler(this.mnuDefrag_Click);
 			// 
 			// mnuTruncate
 			// 
 			this.mnuTruncate.Name = "mnuTruncate";
-			this.mnuTruncate.Size = new System.Drawing.Size(159, 22);
+			this.mnuTruncate.Size = new System.Drawing.Size(264, 22);
 			this.mnuTruncate.Text = "Truncate";
 			this.mnuTruncate.Click += new System.EventHandler(this.mnuTruncate_Click);
 			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(156, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(261, 6);
 			// 
 			// mnuExpertMode
 			// 
@@ -253,7 +269,7 @@
             this.mnuPeekSelectedRecord,
             this.mnuDequeueSelectedRecord});
 			this.mnuExpertMode.Name = "mnuExpertMode";
-			this.mnuExpertMode.Size = new System.Drawing.Size(159, 22);
+			this.mnuExpertMode.Size = new System.Drawing.Size(264, 22);
 			this.mnuExpertMode.Text = "Expert Mode";
 			this.mnuExpertMode.DropDownOpening += new System.EventHandler(this.mnuExpertMode_DropDownOpening);
 			// 
@@ -274,12 +290,12 @@
 			// toolStripMenuItem3
 			// 
 			this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-			this.toolStripMenuItem3.Size = new System.Drawing.Size(156, 6);
+			this.toolStripMenuItem3.Size = new System.Drawing.Size(261, 6);
 			// 
 			// mnuClose
 			// 
 			this.mnuClose.Name = "mnuClose";
-			this.mnuClose.Size = new System.Drawing.Size(159, 22);
+			this.mnuClose.Size = new System.Drawing.Size(264, 22);
 			this.mnuClose.Text = "Close";
 			this.mnuClose.Click += new System.EventHandler(this.mnuClose_Click);
 			// 
@@ -311,30 +327,33 @@
 			this.btnAutoRefresh.Text = "Auto Refresh";
 			this.btnAutoRefresh.Click += new System.EventHandler(this.btnAutoRefresh_Click);
 			// 
-			// toolStripDropDownButton2
+			// toolStripSeparator3
 			// 
-			this.toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuFillTableWith10LastRecords,
-            this.mnuFillTableWithAllRecords});
-			this.toolStripDropDownButton2.Image = global::FileMappedCollectionViewer.Properties.Resources.table;
-			this.toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
-			this.toolStripDropDownButton2.Size = new System.Drawing.Size(61, 22);
-			this.toolStripDropDownButton2.Text = "View";
+			this.toolStripSeparator3.Name = "toolStripSeparator3";
+			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
 			// 
-			// mnuFillTableWith10LastRecords
+			// mnuShowLastRec
 			// 
-			this.mnuFillTableWith10LastRecords.Name = "mnuFillTableWith10LastRecords";
-			this.mnuFillTableWith10LastRecords.Size = new System.Drawing.Size(229, 22);
-			this.mnuFillTableWith10LastRecords.Text = "Fill Table with 10 Last Records";
-			this.mnuFillTableWith10LastRecords.Click += new System.EventHandler(this.mnuFillTableWith10LastRecords_Click);
+			this.mnuShowLastRec.Name = "mnuShowLastRec";
+			this.mnuShowLastRec.Size = new System.Drawing.Size(36, 22);
+			this.mnuShowLastRec.Text = "Show";
+			this.mnuShowLastRec.Click += new System.EventHandler(this.mnuShowLastRec_Click);
 			// 
-			// mnuFillTableWithAllRecords
+			// txtShowNRecords
 			// 
-			this.mnuFillTableWithAllRecords.Name = "mnuFillTableWithAllRecords";
-			this.mnuFillTableWithAllRecords.Size = new System.Drawing.Size(229, 22);
-			this.mnuFillTableWithAllRecords.Text = "Fill Table with All Records";
-			this.mnuFillTableWithAllRecords.Click += new System.EventHandler(this.mnuFillTableWithAllRecords_Click);
+			this.txtShowNRecords.Name = "txtShowNRecords";
+			this.txtShowNRecords.Size = new System.Drawing.Size(60, 25);
+			this.txtShowNRecords.Text = "10";
+			this.txtShowNRecords.ToolTipText = "Show Last n Records (Enter Negative for First n, Enter 0 for All)";
+			// 
+			// btnShowRecords
+			// 
+			this.btnShowRecords.Image = global::FileMappedCollectionViewer.Properties.Resources.table;
+			this.btnShowRecords.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.btnShowRecords.Name = "btnShowRecords";
+			this.btnShowRecords.Size = new System.Drawing.Size(69, 22);
+			this.btnShowRecords.Text = "Records";
+			this.btnShowRecords.Click += new System.EventHandler(this.btnShowRecords_Click);
 			// 
 			// toolStripSeparator1
 			// 
@@ -353,9 +372,9 @@
             this.lblNumRecordsStatusBar,
             this.lblVerifyState,
             this.lblLastUpdated});
-			this.statusStrip1.Location = new System.Drawing.Point(0, 332);
+			this.statusStrip1.Location = new System.Drawing.Point(0, 268);
 			this.statusStrip1.Name = "statusStrip1";
-			this.statusStrip1.Size = new System.Drawing.Size(767, 25);
+			this.statusStrip1.Size = new System.Drawing.Size(675, 25);
 			this.statusStrip1.TabIndex = 4;
 			this.statusStrip1.Text = "statusStrip1";
 			// 
@@ -396,7 +415,7 @@
 			// 
 			this.splitContainer1.Panel2.Controls.Add(this.grdRecords);
 			this.splitContainer1.Size = new System.Drawing.Size(617, 219);
-			this.splitContainer1.SplitterDistance = 90;
+			this.splitContainer1.SplitterDistance = 82;
 			this.splitContainer1.TabIndex = 6;
 			this.splitContainer1.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.splitContainer1_SplitterMoved);
 			// 
@@ -404,7 +423,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(767, 357);
+			this.ClientSize = new System.Drawing.Size(675, 293);
 			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.statusStrip1);
 			this.Controls.Add(this.toolStrip1);
@@ -445,17 +464,9 @@
 		private ToolStripSeparator toolStripMenuItem3;
 		private ToolStripMenuItem mnuClose;
 		private ToolStripDropDownButton toolStripDropDownButton5;
-		private ToolStripDropDownButton toolStripDropDownButton2;
 		private StatusStrip statusStrip1;
 		private ToolStripMenuItem mnuCopyCellText;
 		private ToolStripButton btnAutoRefresh;
-		private ToolStripMenuItem mnuFillTableWith10LastRecords;
-		private ToolStripMenuItem mnuFillTableWithAllRecords;
-		private DataGridViewTextBoxColumn Column1;
-		private DataGridViewTextBoxColumn Column2;
-		private DataGridViewTextBoxColumn Column4;
-		private DataGridViewTextBoxColumn Column3;
-		private DataGridViewTextBoxColumn Column5;
 		private ToolStripStatusLabel lblNumRecordsStatusBar;
 		private ToolStripStatusLabel lblVerifyState;
 		private ToolStripStatusLabel lblLastUpdated;
@@ -466,5 +477,14 @@
 		private ToolStripSeparator toolStripMenuItem4;
 		private ToolStripSeparator toolStripSeparator1;
 		private ToolStripLabel txtPath;
+		private ToolStripLabel mnuShowLastRec;
+		private ToolStripTextBox txtShowNRecords;
+		private ToolStripSeparator toolStripSeparator3;
+		private ToolStripButton btnShowRecords;
+		private DataGridViewTextBoxColumn Column1;
+		private DataGridViewTextBoxColumn Column2;
+		private DataGridViewTextBoxColumn Column4;
+		private DataGridViewTextBoxColumn Column3;
+		private DataGridViewTextBoxColumn Column5;
 	}
 }

@@ -46,16 +46,16 @@
 			// 
 			this.txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.txtPath.Location = new System.Drawing.Point(74, 12);
+			this.txtPath.Location = new System.Drawing.Point(12, 27);
 			this.txtPath.Name = "txtPath";
-			this.txtPath.Size = new System.Drawing.Size(404, 23);
+			this.txtPath.Size = new System.Drawing.Size(500, 23);
 			this.txtPath.TabIndex = 17;
 			this.txtPath.Text = "c:\\temp\\a.amc";
 			// 
 			// chkRegenerateFile
 			// 
 			this.chkRegenerateFile.AutoSize = true;
-			this.chkRegenerateFile.Location = new System.Drawing.Point(13, 103);
+			this.chkRegenerateFile.Location = new System.Drawing.Point(12, 63);
 			this.chkRegenerateFile.Name = "chkRegenerateFile";
 			this.chkRegenerateFile.Size = new System.Drawing.Size(160, 19);
 			this.chkRegenerateFile.TabIndex = 21;
@@ -67,7 +67,7 @@
 			this.chkAutoShrink.AutoSize = true;
 			this.chkAutoShrink.Checked = true;
 			this.chkAutoShrink.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.chkAutoShrink.Location = new System.Drawing.Point(215, 44);
+			this.chkAutoShrink.Location = new System.Drawing.Point(212, 102);
 			this.chkAutoShrink.Name = "chkAutoShrink";
 			this.chkAutoShrink.Size = new System.Drawing.Size(133, 19);
 			this.chkAutoShrink.TabIndex = 22;
@@ -76,14 +76,14 @@
 			// 
 			// nudMaxExtensions
 			// 
-			this.nudMaxExtensions.Location = new System.Drawing.Point(108, 71);
+			this.nudMaxExtensions.Location = new System.Drawing.Point(271, 129);
 			this.nudMaxExtensions.Maximum = new decimal(new int[] {
             255,
             0,
             0,
             0});
 			this.nudMaxExtensions.Name = "nudMaxExtensions";
-			this.nudMaxExtensions.Size = new System.Drawing.Size(70, 23);
+			this.nudMaxExtensions.Size = new System.Drawing.Size(52, 23);
 			this.nudMaxExtensions.TabIndex = 18;
 			this.nudMaxExtensions.Value = new decimal(new int[] {
             12,
@@ -93,7 +93,7 @@
 			// 
 			// nudExtensionsizeMB
 			// 
-			this.nudExtensionsizeMB.Location = new System.Drawing.Point(271, 71);
+			this.nudExtensionsizeMB.Location = new System.Drawing.Point(105, 129);
 			this.nudExtensionsizeMB.Maximum = new decimal(new int[] {
             2000,
             0,
@@ -105,7 +105,7 @@
             0,
             0});
 			this.nudExtensionsizeMB.Name = "nudExtensionsizeMB";
-			this.nudExtensionsizeMB.Size = new System.Drawing.Size(50, 23);
+			this.nudExtensionsizeMB.Size = new System.Drawing.Size(70, 23);
 			this.nudExtensionsizeMB.TabIndex = 19;
 			this.nudExtensionsizeMB.Value = new decimal(new int[] {
             4,
@@ -116,7 +116,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(13, 15);
+			this.label1.Location = new System.Drawing.Point(12, 9);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(52, 15);
 			this.label1.TabIndex = 11;
@@ -124,7 +124,7 @@
 			// 
 			// nudInitialSizeMB
 			// 
-			this.nudInitialSizeMB.Location = new System.Drawing.Point(108, 42);
+			this.nudInitialSizeMB.Location = new System.Drawing.Point(105, 100);
 			this.nudInitialSizeMB.Maximum = new decimal(new int[] {
             2000,
             0,
@@ -147,7 +147,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(13, 46);
+			this.label5.Location = new System.Drawing.Point(10, 104);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(80, 15);
 			this.label5.TabIndex = 12;
@@ -156,16 +156,16 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(13, 75);
+			this.label2.Location = new System.Drawing.Point(213, 133);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(89, 15);
+			this.label2.Size = new System.Drawing.Size(52, 15);
 			this.label2.TabIndex = 13;
-			this.label2.Text = "Max Extensions";
+			this.label2.Text = "Max Ext.";
 			// 
 			// label9
 			// 
 			this.label9.AutoSize = true;
-			this.label9.Location = new System.Drawing.Point(184, 46);
+			this.label9.Location = new System.Drawing.Point(181, 104);
 			this.label9.Name = "label9";
 			this.label9.Size = new System.Drawing.Size(25, 15);
 			this.label9.TabIndex = 14;
@@ -174,7 +174,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(327, 75);
+			this.label6.Location = new System.Drawing.Point(181, 133);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(25, 15);
 			this.label6.TabIndex = 15;
@@ -183,7 +183,7 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(184, 75);
+			this.label7.Location = new System.Drawing.Point(10, 133);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(81, 15);
 			this.label7.TabIndex = 16;
@@ -191,7 +191,7 @@
 			// 
 			// btnDelete
 			// 
-			this.btnDelete.Location = new System.Drawing.Point(484, 7);
+			this.btnDelete.Location = new System.Drawing.Point(449, 56);
 			this.btnDelete.Name = "btnDelete";
 			this.btnDelete.Size = new System.Drawing.Size(63, 30);
 			this.btnDelete.TabIndex = 23;
@@ -201,9 +201,9 @@
 			// 
 			// btnStoreToFields
 			// 
-			this.btnStoreToFields.Location = new System.Drawing.Point(385, 80);
+			this.btnStoreToFields.Location = new System.Drawing.Point(393, 148);
 			this.btnStoreToFields.Name = "btnStoreToFields";
-			this.btnStoreToFields.Size = new System.Drawing.Size(162, 42);
+			this.btnStoreToFields.Size = new System.Drawing.Size(119, 42);
 			this.btnStoreToFields.TabIndex = 0;
 			this.btnStoreToFields.Text = "Update Fields";
 			this.btnStoreToFields.UseVisualStyleBackColor = true;
@@ -213,7 +213,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(559, 132);
+			this.ClientSize = new System.Drawing.Size(524, 202);
 			this.Controls.Add(this.btnStoreToFields);
 			this.Controls.Add(this.btnDelete);
 			this.Controls.Add(this.txtPath);

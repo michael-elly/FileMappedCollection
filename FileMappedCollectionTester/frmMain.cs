@@ -52,7 +52,9 @@ public partial class frmMain : Form {
 	private static System.Timers.Timer aTimer;
 
 	private void ATimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
-		this.Invoke(new UpdateRefresh(this.RefreshControlsNow));
+		try {
+			this.Invoke(new UpdateRefresh(this.RefreshControlsNow));
+		} catch { }
 	}
 
 	private void LoadFile() {
@@ -112,8 +114,7 @@ public partial class frmMain : Form {
 				}
 
 				txtProperties.Text = @$"File Size: {(size_bytes / 1024 / 1024):N0}MB, Initial Size: {init_size_mb:N0}MB, Max Size: {max_size_bytes / 1024 / 1024:N0}MB, Increment Size: {size_increment_bytes / 1024 / 1024}MB
-Records Count: {records_count:N0}, Percent Free: {percent_free:N1}%, Percent Free Immidiate: {percent_free_immidiate:N1}%
-";
+Records Count: {records_count:N0}, Percent Free: {percent_free:N1}%, Percent Free Immidiate: {percent_free_immidiate:N1}%";
 				lblNumRecordsStatusBar.Text = string.Format("Records Count: {0:#,0}", records_count);				
 				lblLastUpdated.Text = string.Format("Last Updated: {0}", DateTime.Now.ToString("HH:mm:ss"));
 			}
@@ -255,6 +256,17 @@ Records Count: {records_count:N0}, Percent Free: {percent_free:N1}%, Percent Fre
 
 	}
 
+	Dictionary<int, byte[]> mPayloads = new Dictionary<int, byte[]>();
+
+	static String BytesToString(long byteCount) {
+		string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
+		if (byteCount == 0) return $"0 {suf[0]}";
+		long bytes = Math.Abs(byteCount);
+		int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+		double num = Math.Round(bytes / Math.Pow(1024, place), 1);
+		return $"{Math.Sign(byteCount) * num} {suf[place]}";
+	}
+
 	private void PopulateRecords(int count, bool reverse) {
 		int i;
 		List<FileMappedCollection.Record> l;
@@ -275,14 +287,16 @@ Records Count: {records_count:N0}, Percent Free: {percent_free:N1}%, Percent Fre
 				//	}
 				//}
 
+				mPayloads = new Dictionary<int, byte[]>();
 				DataTable d = GetEmptyGridDateTable();
 				// fill in the datatable
 				DataRow relation;
 				foreach (FileMappedCollection.Record r in l) {
-					object[] rowArray = new object[] { ++i, r.StartAddress, r.NextRecordStartAddress, r.RecordSize, FileMappedCollection.ByteArrayToString(r.RecordBody) };
+					object[] rowArray = new object[] { ++i, r.StartAddress, r.NextRecordStartAddress, r.RecordSize, BytesToString(r.RecordBody.Length) };
 					relation = d.NewRow();
-					relation.ItemArray = rowArray;
+					relation.ItemArray = rowArray;					
 					d.Rows.Add(relation);
+					mPayloads[i] = r.RecordBody; // FileMappedCollection.ByteArrayToString(r.RecordBody)
 					if (count > 0 && i >= count) break;
 				}
 				// make the datagridview to display the populated datatble
@@ -305,20 +319,12 @@ Records Count: {records_count:N0}, Percent Free: {percent_free:N1}%, Percent Fre
 		return d;
 	}
 
-	private void mnuFillTableWith10LastRecords_Click(object sender, EventArgs e) {
-		PopulateRecords(10, true);
-
-	}
-
-	private void mnuFillTableWithAllRecords_Click(object sender, EventArgs e) {
-		PopulateRecords(-1, false);
-
-	}
-
 	private void grdRecords_CellDoubleClick(object sender, DataGridViewCellEventArgs e) {
 		if (e != null && e.RowIndex >= 0 && e.ColumnIndex == 4 && grdRecords.Rows[e.RowIndex].Cells[e.ColumnIndex].Value != null) {
 			frmXml f = new frmXml();
-			f.mXmlText = grdRecords.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+			//f.mXmlText = grdRecords.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+			int i = int.Parse(grdRecords.Rows[e.RowIndex].Cells[0].Value.ToString());
+			f.mXmlText = FileMappedCollection.ByteArrayToString(mPayloads[i]);
 			f.ShowDialog(this);
 		}
 	}
@@ -359,5 +365,23 @@ Records Count: {records_count:N0}, Percent Free: {percent_free:N1}%, Percent Fre
 
 	private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e) {
 			
+	}
+
+	private void mnuShowLastRec_Click(object sender, EventArgs e) {
+	}
+
+	private void btnShowRecords_Click(object sender, EventArgs e) {
+		int n;
+		if (!int.TryParse(txtShowNRecords.Text, out _)) txtShowNRecords.Text = "10";
+
+		n = int.Parse(txtShowNRecords.Text);
+		if (n == 0) {
+			PopulateRecords(-1, false);
+		} else if (n > 0) {
+			PopulateRecords(n, true);
+		} else if (n < 0) {
+			PopulateRecords(Math.Abs(n), false);
+		}
+
 	}
 }

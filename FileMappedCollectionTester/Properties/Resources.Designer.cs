@@ -63,6 +63,16 @@ namespace FileMappedCollectionViewer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap blue_document_binary {
+            get {
+                object obj = ResourceManager.GetObject("blue-document-binary", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap check_ok {
             get {
                 object obj = ResourceManager.GetObject("check_ok", resourceCulture);
