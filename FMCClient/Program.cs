@@ -23,12 +23,13 @@ class Program {
 		mHelp.AppendLine("");
 		mHelp.AppendLine(@"6  = Consume 'c:\temp\a.amc' 1 msg 0 0");
 		mHelp.AppendLine(@"7  = Consume 'c:\temp\a.amc' 2 min 300 1");
-		mHelp.AppendLine(@"8  = Consume 'c:\temp\a.amc' 2 min 50 1");
-		mHelp.AppendLine(@"9  = Consume 'c:\temp\a.amc' 2 min 50 0");
-		mHelp.AppendLine(@"10 = Consume 'c:\temp\a.amc' 2 min 10 1");
-		mHelp.AppendLine(@"11 = Consume 'c:\temp\a.amc' 2 min 10 0");
-		mHelp.AppendLine(@"12 = Consume 'c:\temp\a.amc' 1 min  0 1");
-		mHelp.AppendLine(@"13 = Consume 'c:\temp\a.amc' 1 min  0 0");
+		mHelp.AppendLine(@"8  = Consume 'c:\temp\a.amc' 2 min 300 0");
+		mHelp.AppendLine(@"9  = Consume 'c:\temp\a.amc' 2 min 50 1");
+		mHelp.AppendLine(@"10 = Consume 'c:\temp\a.amc' 2 min 50 0");
+		mHelp.AppendLine(@"11 = Consume 'c:\temp\a.amc' 2 min 10 1");
+		mHelp.AppendLine(@"12 = Consume 'c:\temp\a.amc' 2 min 10 0");
+		mHelp.AppendLine(@"13 = Consume 'c:\temp\a.amc' 1 min  0 1");
+		mHelp.AppendLine(@"14 = Consume 'c:\temp\a.amc' 1 min  0 0");
 		mHelp.AppendLine("Enter q to quit");
 		mHelp.AppendLine("Enter h to help");
 
@@ -50,7 +51,7 @@ class Program {
 			} else if (input.Trim().ToLower() == "h") {
 				Console.WriteLine(mHelp.ToString());
 			} else if (int.TryParse(input, out selected_option)) {
-				if (selected_option >= 1 && selected_option <= 13) {
+				if (selected_option >= 1 && selected_option <= 14) {
 					if (selected_option == 1) {
 						Produce("c:\\temp\\a.amc", 1, true, 2, 2, 0);
 					} else if (selected_option == 2) {
@@ -66,16 +67,18 @@ class Program {
 					} else if (selected_option == 7) {
 						Consume("c:\\temp\\a.amc", 2, false, 300, true);
 					} else if (selected_option == 8) {
-						Consume("c:\\temp\\a.amc", 2, false, 50, true);
+						Consume("c:\\temp\\a.amc", 2, false, 300, false);
 					} else if (selected_option == 9) {
-						Consume("c:\\temp\\a.amc", 2, false, 50, false);
+						Consume("c:\\temp\\a.amc", 2, false, 50, true);
 					} else if (selected_option == 10) {
-						Consume("c:\\temp\\a.amc", 2, false, 10, true);
+						Consume("c:\\temp\\a.amc", 2, false, 50, false);
 					} else if (selected_option == 11) {
-						Consume("c:\\temp\\a.amc", 2, false, 10, false);
+						Consume("c:\\temp\\a.amc", 2, false, 10, true);
 					} else if (selected_option == 12) {
-						Consume("c:\\temp\\a.amc", 1, false, 0, true);
+						Consume("c:\\temp\\a.amc", 2, false, 10, false);
 					} else if (selected_option == 13) {
+						Consume("c:\\temp\\a.amc", 1, false, 0, true);
+					} else if (selected_option == 14) {
 						Consume("c:\\temp\\a.amc", 1, false, 0, false);
 					}
 				} else {
@@ -91,9 +94,9 @@ class Program {
 		//new Thread(delegate () { }).Start();
 
 		if (File.Exists(filePath)) {
-			int num_produced = 0;
+			int num_produced = 0; 
 			FileInfo fi = new FileInfo(filePath);
-			FileMappedCollection f = new FileMappedCollection(filePath, (int)fi.Length, (int)fi.Length * 4, (int)fi.Length / 10, false, false);
+			FileMappedCollection f = new FileMappedCollection(filePath);
 			// create a set of 10 random messages	
 			const int sample_random_messages_count = 10;
 			List<byte[]> msgs_byte_arr = new List<byte[]>();
@@ -146,7 +149,7 @@ class Program {
 		if (File.Exists(filePath)) {
 			int num_consumed = 0;
 			FileInfo fi = new FileInfo(filePath);
-			FileMappedCollection f = new FileMappedCollection(filePath, (int)fi.Length, (int)fi.Length * 4, (int)fi.Length / 10, false, false);
+			FileMappedCollection f = new FileMappedCollection(filePath);
 			List<FileMappedCollection.RecordAddress> rec_addresses;
 			if (f.TryPeekAddresses(out rec_addresses, isNumMsg ? count : int.MaxValue)) {
 				if (getRandom) Shuffle<FileMappedCollection.RecordAddress>(rec_addresses);

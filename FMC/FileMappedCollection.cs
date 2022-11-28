@@ -22,7 +22,13 @@ Metadata
 File-Header (Size is 16)
 	FirstRecordStartAddress	Int32 (4 bytes) [value is -1 if no records]
 	LastRecordStartAddress  Int32 (4 bytes) [value is -1 if no records]
-	reserved for future		8 bytes
+
+	Initial Size MB         Int16 (2 bytes)
+	Extension Size MB       Int16 (2 bytes)
+	Num Allowed Extensions  Byte  (1 bytes)
+	Enabled Auto Shrink     Byte  (1 bytes)
+
+ 	Reserved for future		      (2 bytes)
 
 Record (Size is 16 + n)
 	NextRecordStartAddress	Int32 (4 bytes) [value is -1 for first record]
@@ -114,6 +120,11 @@ public class FileMappedCollection { // records collection file
 	public bool EnableAutoShrink { get; private set; }
 	public int FileSizeBytes { get; private set; }
 
+	public readonly bool RegenerateFileIffoundCorrupt;
+	public readonly short InitialFileSizeMB;
+	public readonly short ExtensionSizeMB ;
+	public readonly byte MaxAllowedExtensions ;		
+
 	private const int NULL = -1;
 	public const int FILE_HEADER_SIZE = 16; // all 16 bytes at the begning of the file are reserved for the file header
 	public const int RECORD_HEADER_SIZE = 16;
@@ -133,35 +144,22 @@ public class FileMappedCollection { // records collection file
 	public static string ByteArrayToString(byte[] dBytes) { return enc.GetString(dBytes); }
 	#endregion
 
-	public FileMappedCollection(string filePath, int initialFileSizeBytes, int maxFileSizeBytes, int incrementSizeBytes, bool regenerateFileIffoundCorrupt, bool enableAutoShrink)
-		: this(Path.GetFileNameWithoutExtension(filePath), filePath, initialFileSizeBytes, maxFileSizeBytes, incrementSizeBytes, regenerateFileIffoundCorrupt, enableAutoShrink) {
+	public FileMappedCollection(string filePath, bool regenerateFileIffoundCorrupt = false, short initialFileSizeMB = 32, short extensionSizeMB = 4, byte maxAllowedExtensions = 12, bool enableAutoShrink = true)
+		: this(Path.GetFileNameWithoutExtension(filePath), filePath, regenerateFileIffoundCorrupt, initialFileSizeMB, extensionSizeMB, maxAllowedExtensions, enableAutoShrink) {
 	}
-
-	/// <summary>
-	/// Main Constructor
-	/// </summary>
-	/// <param name="systemWideIdentifier"> Must not contain any slash / \ </param>
-	/// <param name="filePath"></param>
-	/// <param name="initialFileSizeBytes"></param>
-	/// <param name="maxFileSizeBytes"></param>
-	/// <param name="incrementSizeBytes"></param>
-	/// <param name="regenerateFileIffoundCorrupt"></param>
-	[SupportedOSPlatform("linux")]
-	[SupportedOSPlatform("windows")]
-	public FileMappedCollection(string systemWideIdentifier, string filePath, int initialFileSizeBytes, int maxFileSizeBytes, int incrementSizeBytes, bool regenerateFileIffoundCorrupt, bool enableAutoShrink) {
+	
+	private FileMappedCollection(string systemWideIdentifier, string filePath, bool regenerateFileIffoundCorrupt, short initialFileSizeMB, short extensionSizeMB, byte maxAllowedExtensions, bool enableAutoShrink) {
 		FilePath = filePath;
-		FileSizeInitialBytes = (File.Exists(FilePath) ? ((int)(new FileInfo(FilePath)).Length) : initialFileSizeBytes);
-		FileSizeMaxBytes = maxFileSizeBytes;
-		FileSizeIncrementBytes = incrementSizeBytes;
+		FileSizeInitialBytes = initialFileSizeMB * 1024 * 1024;
+		FileSizeIncrementBytes = extensionSizeMB * 1024 * 1024;
+		FileSizeMaxBytes = FileSizeInitialBytes + maxAllowedExtensions * FileSizeIncrementBytes;
 		SystemWideIdentifier = systemWideIdentifier;
 		EnableAutoShrink = enableAutoShrink;
 
-		if (FileSizeInitialBytes <= 1024) throw new Exception(string.Format("AMS Notifier Thread Initialization Error: Invalid argument for initialFileSizeBytes {0}, value must be greater than 1024. Consider changing host properties, pushing new psdb.xml, and restarting the AMS service. ", FileSizeInitialBytes));
-		if (maxFileSizeBytes <= 1024) throw new Exception(string.Format("AMS Notifier Thread Initialization Error: Invalid argument for maxFileSizeBytes {0}, value must be greater than 1024. Consider changing host properties, pushing new psdb.xml, and restarting the AMS service. ", maxFileSizeBytes));
-		if (incrementSizeBytes < 0) throw new Exception(string.Format("AMS Notifier Thread Initialization Error: Invalid argument for incrementSizeBytes {0}, value must be greater than 1024. Consider changing host properties, pushing new psdb.xml, and restarting the AMS service. ", incrementSizeBytes));
-		if (FileSizeInitialBytes > FileSizeMaxBytes) throw new Exception(string.Format("AMS Notifier Thread Initialization Error: Initial file size {0} cannot exceed max file size {1} bytes. Consider changing host properties, pushing new psdb.xml, and restarting the AMS service OR resetting the notifier file {2}", FileSizeInitialBytes, maxFileSizeBytes, filePath));
-		if (incrementSizeBytes > FileSizeMaxBytes - FileSizeInitialBytes) throw new Exception(string.Format("AMS Notifier Thread Initialization Error: Increment file size {0} cannot exceed max minus initial file size {1} bytes. Consider changing host properties, pushing new psdb.xml, and restarting the AMS service OR resetting the notifier file {2}",
-			incrementSizeBytes, maxFileSizeBytes - FileSizeInitialBytes, filePath));
+		RegenerateFileIffoundCorrupt = regenerateFileIffoundCorrupt;
+		InitialFileSizeMB = initialFileSizeMB;
+		ExtensionSizeMB = extensionSizeMB;
+		MaxAllowedExtensions = maxAllowedExtensions;		
 
 		// Mutex setup
 		MUTEX_NAME = string.Format("Global\\Intel:{0}", SystemWideIdentifier);
@@ -183,6 +181,20 @@ public class FileMappedCollection { // records collection file
 		// setup the system wide (cross process) event wait handle
 		mRecordAddedEvent = new EventWaitHandle(true, EventResetMode.AutoReset, SystemWideIdentifier, out created_new);
 		mRecordAddedEvent.SetAccessControl(eventSecurity);
+
+		if (File.Exists(filePath)) {
+			// if file exists then the metadata for number of allowed extensions and sizes etc are being overriden by the values in the file
+			ReadHeaderMetaData(out initialFileSizeMB, out extensionSizeMB, out maxAllowedExtensions, out enableAutoShrink);
+			int current_file_size_bytes = (int)(new FileInfo(FilePath)).Length;
+			if (!VerifyFileSize(current_file_size_bytes, initialFileSizeMB, extensionSizeMB, maxAllowedExtensions, out string file_size_error)) throw new Exception(file_size_error);
+			FileSizeInitialBytes = initialFileSizeMB * 1024 * 1024;
+			FileSizeIncrementBytes = extensionSizeMB * 1024 * 1024;
+			FileSizeMaxBytes = FileSizeInitialBytes + maxAllowedExtensions * FileSizeIncrementBytes;			
+			EnableAutoShrink = enableAutoShrink;
+		}
+
+		if (FileSizeInitialBytes <= 1024) throw new Exception($"Invalid argument for initialFileSizeMB {initialFileSizeMB}, value must be >= 1");
+		if (FileSizeIncrementBytes <= 1024) throw new Exception($"Invalid argument for extensionSizeMB {extensionSizeMB}, value must be >= 1");
 
 		// in case asked to rebuild the file when corrupted
 		bool already_verified_consistency = false;
@@ -220,7 +232,7 @@ public class FileMappedCollection { // records collection file
 				throw new Exception(string.Format("Mutex was not aquired upon RCF {0} startup", filePath));
 			}
 			// write the new file header
-			if (!WriteHeader(NULL, NULL)) throw new Exception(string.Format("Error initializing file header on \"{0}\"", filePath));
+			if (!WriteHeaderInitial(initialFileSizeMB, extensionSizeMB, maxAllowedExtensions, enableAutoShrink)) throw new Exception(string.Format("Error initializing file header on \"{0}\"", filePath));
 		} else {
 			// file exists so just verify its consistency
 			if (!already_verified_consistency) {
@@ -373,6 +385,56 @@ public class FileMappedCollection { // records collection file
 		}
 	}
 
+	public bool ReadHeaderMetaData(out short initialFileSizeMB, out short extensionSize__MB, out byte maxAllowedExtends, out bool enableAutoShrink) {
+		int firstRecordStartAddress;
+		int lastRecordStartAddress;
+
+		if (AcquireMutex()) {
+			try {
+				using (FileStream fs = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+					using (BinaryReader r = new BinaryReader(fs)) {
+						firstRecordStartAddress = r.ReadInt32();
+						lastRecordStartAddress = r.ReadInt32();
+
+						initialFileSizeMB = r.ReadInt16();
+						extensionSize__MB = r.ReadInt16();
+						maxAllowedExtends = r.ReadByte();
+						enableAutoShrink = r.ReadByte() == 1 ? true : false;
+					}
+				}
+				return true;
+			} finally {
+				ReleaseMutex();
+			}
+		} else {
+			firstRecordStartAddress = -1;
+			lastRecordStartAddress = -1;
+			initialFileSizeMB = -1;
+			extensionSize__MB = 01;
+			maxAllowedExtends = 0;
+			enableAutoShrink = false;
+			return false;
+		}
+	}
+
+	/*
+	private bool WriteHeaderInitial(short initialFileSizeMB, short extensionSize__MB, byte maxAllowedExtends, bool enableAutoShrink) {
+		int firstRecrdStartAddress = NULL;
+		int lastRecordStartAddress = NULL;
+		byte enableAutoShrinkB = enableAutoShrink ? (byte)1 : (byte)0;
+
+		try {
+			byte[] h = new byte[14];
+			Array.Copy(BitConverter.GetBytes(firstRecrdStartAddress), 0, h, 0, 4);
+			Array.Copy(BitConverter.GetBytes(lastRecordStartAddress), 0, h, 4, 4);
+
+			Array.Copy(BitConverter.GetBytes(initialFileSizeMB), 0, h, 8, 2);
+			Array.Copy(BitConverter.GetBytes(extensionSize__MB), 0, h, 10, 2);
+			Array.Copy(BitConverter.GetBytes(maxAllowedExtends), 0, h, 12, 1);
+			Array.Copy(BitConverter.GetBytes(enableAutoShrinkB), 0, h, 13, 1);
+	 
+	 */
+
 	// private method that should only be called by methods who already aquired mutex
 	// note that the values returned by this may be outside the file size if last record is close to the end of the file
 	private void NewRecordPotential(out int newRecordStartAddress, out int currentLastRecordStartAddress) {
@@ -429,6 +491,34 @@ public class FileMappedCollection { // records collection file
 			byte[] h = new byte[8];
 			Array.Copy(BitConverter.GetBytes(firstRecordStartAddress), 0, h, 0, 4);
 			Array.Copy(BitConverter.GetBytes(lastRecordStartAddress), 0, h, 4, 4);
+
+			// do it in one write trasation (for 64 bit machines, doing at 8 bytes[] operation is atomic)
+			using (FileStream fs = new FileStream(FilePath, FileMode.Open, FileAccess.Write, FileShare.None)) {
+				using (BinaryWriter w = new BinaryWriter(fs)) {
+					w.Write(h);
+					w.Flush();
+				}
+			}
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	private bool WriteHeaderInitial(short initialFileSizeMB, short extensionSize__MB, byte maxAllowedExtends, bool enableAutoShrink) {
+		int firstRecrdStartAddress = NULL;
+		int lastRecordStartAddress = NULL;
+		byte enableAutoShrinkB = enableAutoShrink ? (byte)1 : (byte)0;
+
+		try {
+			byte[] h = new byte[14];
+			Array.Copy(BitConverter.GetBytes(firstRecrdStartAddress), 0, h, 0, 4);
+			Array.Copy(BitConverter.GetBytes(lastRecordStartAddress), 0, h, 4, 4);
+
+			Array.Copy(BitConverter.GetBytes(initialFileSizeMB), 0, h, 8, 2);
+			Array.Copy(BitConverter.GetBytes(extensionSize__MB), 0, h, 10, 2);
+			Array.Copy(BitConverter.GetBytes(maxAllowedExtends), 0, h, 12, 1);
+			Array.Copy(BitConverter.GetBytes(enableAutoShrinkB), 0, h, 13, 1);
 
 			// do it in one write trasation (for 64 bit machines, doing at 8 bytes[] operation is atomic)
 			using (FileStream fs = new FileStream(FilePath, FileMode.Open, FileAccess.Write, FileShare.None)) {
@@ -981,9 +1071,26 @@ public class FileMappedCollection { // records collection file
 		}
 	}
 
+	public bool VerifyFileSize(int current_file_size_bytes, short initialFileSizeMB, short extensionSizeMB, byte maxAllowedExtensions, out string errorMessage) {
+		bool file_size_ok = false;
+		for (byte i = 0; i <= maxAllowedExtensions; i++) {
+			if (current_file_size_bytes == initialFileSizeMB * 1024 * 1024 + i * extensionSizeMB * 1024 * 1024) {
+				file_size_ok = true;
+				break;
+			}
+		}
+		if (file_size_ok) {
+			errorMessage = "";
+			return true;
+		} else {
+			errorMessage = $"Invalid file size {current_file_size_bytes:N0} bytes. File size should be {initialFileSizeMB:N0}MB with up to {maxAllowedExtensions:N0} optional extensions of {extensionSizeMB:N0}MB each.";
+			return false;
+		}
+	}
+
 	public bool VerifyConsistency(out string errorMessage) {
 		if (AcquireMutex()) {
-			try {
+			try {				
 				int first_record_start, last_record_start, next_record_start, record_data_size;
 				using (FileStream fs = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.Read)) {
 					using (BinaryReader r = new BinaryReader(fs)) {

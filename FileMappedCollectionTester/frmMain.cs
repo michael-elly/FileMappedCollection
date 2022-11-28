@@ -1,4 +1,5 @@
 using System.Data;
+using System.Windows.Forms;
 using FileMappedCollectionViewer;
 
 namespace FileMappedCollectionTester;
@@ -11,8 +12,11 @@ public partial class frmMain : Form {
 
 	private void Form1_Load(object sender, EventArgs e) {
 		grdRecords.Dock = DockStyle.Fill;
+		txtProperties.Dock = DockStyle.Fill;
+		splitContainer1.Dock = DockStyle.Fill;
 		grdRecords.BorderStyle = BorderStyle.None;
-
+		txtProperties.BorderStyle = BorderStyle.None;
+		
 		// setup the timer which should be disabled initially
 		aTimer = new System.Timers.Timer(2000);
 		//aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
@@ -25,39 +29,38 @@ public partial class frmMain : Form {
 			if (File.Exists(args[1])) {
 				if (Path.GetExtension(args[1]).ToLower() == ".amc") {
 					txtPath.Text = args[1];
-					btnLoad_Click(sender, e);
+					LoadFile();
 				}
 			}
 		} else {
-			btnLoad_Click(sender, e);
+			LoadFile();
 		}
 	}
 
 	public delegate void UpdateRefresh();
 	FileMappedCollection mRecords;
-	int size_bytes;
+	string path;
+	short init_size_mb; // file size when first created or after shrinked
+	int size_bytes; // current file size
+	short size_extension_mb;
+	byte max_extensions;
 	int max_size_bytes;
 	int size_increment_bytes;
+	bool regerenate_file_on_error;
+	bool enable_auto_shrink;
+
 	private static System.Timers.Timer aTimer;
 
 	private void ATimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
 		this.Invoke(new UpdateRefresh(this.RefreshControlsNow));
 	}
 
-	private void btnLoad_Click(object sender, EventArgs e) {
-		string path = txtPath.Text;
+	private void LoadFile() {
+		frmNewFile f = new frmNewFile();
+		f.PopulateValuesFromControlsToPublicFields();
+		ReadFileSettings();
 
-		if (File.Exists(path)) {
-			size_bytes = (int)(new FileInfo(path)).Length;
-			max_size_bytes = (int)size_bytes * 6;
-			size_increment_bytes = (int)size_bytes / 10;
-		} else {
-			size_bytes = 32*1024*1024;
-			max_size_bytes = size_bytes * 3;
-			size_increment_bytes = size_bytes / 10;
-		}
-
-		mRecords = new FileMappedCollection(path, size_bytes, max_size_bytes, size_increment_bytes, false, false);
+		mRecords = new FileMappedCollection(path, regerenate_file_on_error, init_size_mb, size_extension_mb, max_extensions, enable_auto_shrink);
 		RefreshControlsNow();
 
 		// Empty the Data Grid
@@ -71,6 +74,7 @@ public partial class frmMain : Form {
 		List<FileMappedCollection.Record> l;
 		bool have_read_all_available_records_on_file;
 
+		init_size_mb = (short) (mRecords.FileSizeInitialBytes / 1024/1024);
 		size_bytes = mRecords.FileSizeBytes;
 		max_size_bytes = mRecords.FileSizeMaxBytes;
 		size_increment_bytes = mRecords.FileSizeIncrementBytes;
@@ -107,23 +111,23 @@ public partial class frmMain : Form {
 					ClearPictureImage();
 				}
 
-				txtSize.Text = string.Format("File Size: {0:#,0}KB, Initial Size: {1:#,0}KB, Max Size: {2:#,0}KB, Increment Size: {3:#,0}KB",
-					size_bytes / 1024, size_bytes / 1024, max_size_bytes / 1024, size_increment_bytes / 1024);
-				txtUtil.Text = string.Format("Records Count: {0:#,0}, Percent Free: {1:0.0}%, Percent Free Immidiate: {2:0.0}%", records_count, percent_free, percent_free_immidiate);
-				lblNumRecordsStatusBar.Text = string.Format("Records Count: {0:#,0}", records_count);
-				lblNumRecords.Text = records_count.ToString();
+				txtProperties.Text = @$"File Size: {(size_bytes / 1024 / 1024):N0}MB, Initial Size: {init_size_mb:N0}MB, Max Size: {max_size_bytes / 1024 / 1024:N0}MB, Increment Size: {size_increment_bytes / 1024 / 1024}MB
+Records Count: {records_count:N0}, Percent Free: {percent_free:N1}%, Percent Free Immidiate: {percent_free_immidiate:N1}%
+";
+				lblNumRecordsStatusBar.Text = string.Format("Records Count: {0:#,0}", records_count);				
 				lblLastUpdated.Text = string.Format("Last Updated: {0}", DateTime.Now.ToString("HH:mm:ss"));
-
 			}
 
 			// read the header file
 			int first_rec_start_address;
 			int last_rec_start_address;
+			string h;
 			if (mRecords.ReadHeader(out first_rec_start_address, out last_rec_start_address)) {
-				txtHeader.Text = string.Format("First Record Start Address: {0}, Last Record Start Address: {1}", first_rec_start_address, last_rec_start_address);
+				h = $"First Record Start Address: {first_rec_start_address:N0}, Last Record Start Address: {last_rec_start_address:N0}";
 			} else {
-				txtHeader.Text = "Error reading header";
+				h = "Error reading header";
 			}
+			txtProperties.AppendText($"\r\n{h}");
 
 		}
 	}
@@ -323,5 +327,37 @@ public partial class frmMain : Form {
 		if (mRecords.TryClear()) {
 			RefreshControlsNow();
 		}
+	}
+
+	private void mnuNewFMC_Click(object sender, EventArgs e) {
+		frmNewFile f = new frmNewFile();
+		if (mRecords != null) { f.PopulateValuesFromFmcObjectToPublicFields(mRecords); }
+		f.ShowDialog(this);
+
+		ReadFileSettings();			
+		mRecords = new FileMappedCollection(path, regerenate_file_on_error, init_size_mb, size_extension_mb, max_extensions, enable_auto_shrink);
+		RefreshControlsNow();
+
+		// Empty the Data Grid
+		DataTable d = GetEmptyGridDateTable();
+		grdRecords.DataSource = d;
+
+	}
+
+	private void ReadFileSettings() {
+		path = frmNewFile.path;
+		init_size_mb = frmNewFile.init_size_mb;
+		size_extension_mb = frmNewFile.size_extension_mb;
+		max_extensions = frmNewFile.max_extensions;
+		size_bytes = frmNewFile.size_bytes;
+		regerenate_file_on_error = frmNewFile.regerenate_file_on_error;
+		enable_auto_shrink = frmNewFile.enable_auto_shrink;
+		
+		// also update the UI only for the Path
+		txtPath.Text = path;
+	}
+
+	private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e) {
+			
 	}
 }
