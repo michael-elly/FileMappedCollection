@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Threading;
-using System.Threading;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Runtime.Versioning;
 
-// ========================================================================================================================================
-// This is a stand alone class which can be copied as is to other porojects because it does not have any other dependencies
-// This class manages a binary file that can accept records of byte array and add them internally into the file. These records 
-// can also be read or removed from the file. So this can be used as a general bucket of storing messages and then removing them. 
-// You can think of this as:
-// Concurrent Persisted List<byte[]>
-// ========================================================================================================================================
-
 /*
+ ========================================================================================================================================
+ FILE MAPPED COLLECTION
+ ========================================================================================================================================
+ This is a stand alone class which can be copied as is to other porojects because it does not have any other dependencies
+ This class manages a binary file that can accept records of byte array and add them internally into the file. These records 
+ can also be read or removed from the file. So this can be used as a general bucket of storing messages and then removing them. 
+ You can think of this as: Concurrent Persisted List<byte[]>
+ ========================================================================================================================================
+
 Metadata
 ~~~~~~~~
-File-Header (Size is 16)
+File-Header (Size is 16 bytes)
 	FirstRecordStartAddress	Int32 (4 bytes) [value is -1 if no records]
 	LastRecordStartAddress  Int32 (4 bytes) [value is -1 if no records]
 
@@ -30,7 +30,7 @@ File-Header (Size is 16)
 
  	Reserved for future		      (2 bytes)
 
-Record (Size is 16 + n)
+Record (Size is 16 + n bytes)
 	NextRecordStartAddress	Int32 (4 bytes) [value is -1 for first record]
 	Data Size				Int32 (4 bytes) 
 	reserved for future		8 bytes
@@ -38,13 +38,13 @@ Record (Size is 16 + n)
  
 General Notes
 ~~~~~~~~~~~~~
-. Archive file has the following properties: initial size, max size, and increment size. 
-. File is binary, and can be extended if when adding a record not enought space is available and file size 
-  did not exceed max size. 
-. The class is thread safe cross process as we use Mutex. 
+. The file has the following properties: initial size, max size, and increment size. 
+. The file is binary, and can be extended when adding a record and there is not enought space available 
+  as long as the file size did not exceed max size. 
+. The class is thread safe cross process as we use O/S Mutex. 
 . File header is 16 bytes. Each record header is 16 bytes. 
-. Data is stored and retreived as byte array (that's the only supported format)
-. Messages can only be added after the last record (assuming there's enought space from there till the end of the file),
+. Data is stored and retreived as byte array (that's the only supported record type). 
+. Messages can only be added after the last record (assuming there's enought space till the end of the file),
   or else a defrag should take place to free available space if exists between records, if also defrag 
   did not recover enough space, the file size will be incremented if it still did not reach its max size). 
 . When adding the message and the file is already extended beyond the initial size, and if the add succeeds, 
@@ -53,9 +53,9 @@ General Notes
 . Messages can be removed per index (thus creating 'holes' and fragmentation within the file)
 . When shrinking the messages, space at the beginig and between the records removed and records are placed 
   one after the other. 
-. Each record points to the next one after. Last record points to NULL. 
+. Each record points to the next one following it. Last record points to NULL. 
 . Extend and Defrag are auto invoked internally per need. 
-. Shrink can be are auto invoked internally per need (when EnableAutoShrink is set) and/or done by a client caller. 
+. Shrink can be auto invoked internally per need (when EnableAutoShrink is set) or it can also be explicitly done from a client call. 
 
 
 File Structure
@@ -270,25 +270,6 @@ public class FileMappedCollection { // records collection file
 		}
 	}
 
-	private bool AcquireMutexLong() {
-		// if it was not acquired, it timed out
-		try {
-			//if (!mutex.WaitOne(8000)) {
-			//	throw new Exception(string.Format("Fatal Error. Mutex not acquired after 5 sec for {0}", MUTEX_NAME));
-			//}
-			return mutex.WaitOne(16000);
-		} catch (AbandonedMutexException ex) {
-			// abandoned mutexes are still acquired, we just need
-			// to handle the exception and treat it as acquisition
-			// it means another process aquired the mutex but them crashed and the OS has released the mutex
-			Interlocked.Increment(ref mAbandonedMutexExceptionCount);
-			//string err_msg;
-			//if (!VerifyConsistency(out err_msg)) throw new Exception(string.Format("AcquireMutexLong: File corruption post {0} AbandonedMutexException raised. Source: {1}  Application: {2}. {3}",
-			//	mAbandonedMutexExceptionCount, ex.TargetSite.Name ?? "Null", ex.Source ?? "Null", err_msg), ex);
-			return true;
-		}
-	}
-
 	//MutexRelease()
 	private void ReleaseMutex() {
 		mutex.ReleaseMutex();
@@ -416,24 +397,6 @@ public class FileMappedCollection { // records collection file
 			return false;
 		}
 	}
-
-	/*
-	private bool WriteHeaderInitial(short initialFileSizeMB, short extensionSize__MB, byte maxAllowedExtends, bool enableAutoShrink) {
-		int firstRecrdStartAddress = NULL;
-		int lastRecordStartAddress = NULL;
-		byte enableAutoShrinkB = enableAutoShrink ? (byte)1 : (byte)0;
-
-		try {
-			byte[] h = new byte[14];
-			Array.Copy(BitConverter.GetBytes(firstRecrdStartAddress), 0, h, 0, 4);
-			Array.Copy(BitConverter.GetBytes(lastRecordStartAddress), 0, h, 4, 4);
-
-			Array.Copy(BitConverter.GetBytes(initialFileSizeMB), 0, h, 8, 2);
-			Array.Copy(BitConverter.GetBytes(extensionSize__MB), 0, h, 10, 2);
-			Array.Copy(BitConverter.GetBytes(maxAllowedExtends), 0, h, 12, 1);
-			Array.Copy(BitConverter.GetBytes(enableAutoShrinkB), 0, h, 13, 1);
-	 
-	 */
 
 	// private method that should only be called by methods who already aquired mutex
 	// note that the values returned by this may be outside the file size if last record is close to the end of the file
@@ -761,7 +724,7 @@ public class FileMappedCollection { // records collection file
 		int prev_record_start, this_record_start, next_record_start, record_data_size;
 		int header_first_record_start, header_last_record_start;
 		int new_header_first_record_start, new_header_last_record_start;
-		byte[] b = null;
+		byte[] b;
 		bool is_last_index = false;
 
 		if (AcquireMutex()) {
